@@ -5,7 +5,7 @@
   This example uses the same tree for simplicity.
 */
 
-import { PublicKey, clusterApiUrl } from "@solana/web3.js";
+import { PublicKey, clusterApiUrl, Transaction, SystemProgram, sendAndConfirmTransaction, Keypair } from "@solana/web3.js";
 import {
   MetadataArgs,
   TokenProgramVersion,
@@ -24,14 +24,105 @@ import {
 
 // load the env variables and store the cluster RPC url
 import dotenv from "dotenv";
+import { TipLink } from "@tiplink/api";
 dotenv.config();
+
+// Array of metadata for each NFT
+const nftMetadatas: NFTMetadata[] = [
+  {
+    name: "Compressed NFT 1",
+    uri: "https://shdw-drive.genesysgo.net/HcnRQ2WJHfJzSgPrs4pPtEkiQjYTu1Bf6DmMns1yEWr8/1.json",
+    symbol:"Testy Test"
+    // ...other properties...
+  },
+  {
+    name: "Compressed NFT 2",
+    uri: "https://shdw-drive.genesysgo.net/HcnRQ2WJHfJzSgPrs4pPtEkiQjYTu1Bf6DmMns1yEWr8/1.json",
+    symbol:"Testy Test"
+    // ...other properties...
+  },
+  // ...more NFT metadata...
+];
+
+type NFTMetadata = {
+  name: string;
+  uri: string;
+  symbol: string;
+  // ...other properties...
+};
+
+
+const TIPLINK_MINIMUM_LAMPORTS = 1_000_000;
+
+const createAndFundTiplink = async (
+  connection: WrapperConnection,
+  payer: Keypair,
+  treeAddress: PublicKey,
+  collectionMint: PublicKey,
+  collectionMetadataAccount: PublicKey,
+  collectionMasterEditionAccount: PublicKey,
+  nftMetadata: NFTMetadata
+) => {  const tipLink = await TipLink.create();
+  const tipLinkPubKey = tipLink.keypair.publicKey;
+  console.log(tipLink.url.href);
+  
+  const transaction = new Transaction().add(
+    SystemProgram.transfer({
+      fromPubkey: payer.publicKey,
+      toPubkey: tipLink.keypair.publicKey,
+      lamports: TIPLINK_MINIMUM_LAMPORTS,
+    }),
+  );
+
+  await sendAndConfirmTransaction(connection, transaction, [payer], {commitment: 'confirmed'});
+
+  const compressedNFTMetadata: MetadataArgs = {
+    name: nftMetadata.name,
+    symbol: nftMetadata.symbol,
+    // specific json metadata for each NFT
+    uri: nftMetadata.uri,
+    creators: [
+      {
+        address: payer.publicKey,
+        verified: false,
+        share: 100,
+      },
+      {
+        address: tipLinkPubKey,
+        verified: false,
+        share: 0,
+      },
+    ],
+    editionNonce: 0,
+    uses: null,
+    collection: null,
+    primarySaleHappened: false,
+    sellerFeeBasisPoints: 0,
+    isMutable: false,
+    // values taken from the Bubblegum package
+    tokenProgramVersion: TokenProgramVersion.Original,
+    tokenStandard: TokenStandard.NonFungible,
+  };
+
+  console.log(`Minting a single compressed NFT to ${tipLinkPubKey.toBase58()}...`);
+
+  await mintCompressedNFT(
+    connection,
+    payer,
+    treeAddress,
+    collectionMint,
+    collectionMetadataAccount,
+    collectionMasterEditionAccount,
+    compressedNFTMetadata,
+    // mint to this specific wallet (in this case, airdrop to `testWallet`)
+    tipLinkPubKey,
+  );
+};
 
 (async () => {
   //////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
-  // generate a new Keypair for testing, named `wallet`
-  const testWallet = loadOrGenerateKeypair("testWallet");
 
   // generate a new keypair for use in this demo (or load it locally from the filesystem when available)
   const payer = process.env?.LOCAL_PAYER_JSON_ABSPATH
@@ -39,7 +130,8 @@ dotenv.config();
     : loadOrGenerateKeypair("payer");
 
   console.log("Payer address:", payer.publicKey.toBase58());
-  console.log("Test wallet address:", testWallet.publicKey.toBase58());
+  
+  const TIPLINK_MINIMUM_LAMPORTS = 1_000_000
 
   // load the stored PublicKeys for ease of use
   let keys = loadPublicKeysFromFile();
@@ -65,7 +157,7 @@ dotenv.config();
   //////////////////////////////////////////////////////////////////////////////
 
   // load the env variables and store the cluster RPC url
-  const CLUSTER_URL = process.env.RPC_URL ?? clusterApiUrl("devnet");
+  const CLUSTER_URL = process.env.RPC_URL ?? clusterApiUrl("mainnet-beta");
 
   // create a new rpc connection, using the ReadApi wrapper
   const connection = new WrapperConnection(CLUSTER_URL);
@@ -75,65 +167,16 @@ dotenv.config();
 
   printConsoleSeparator();
 
-  /*
-    Mint a single compressed NFT
-  */
+  for (const nftMetadata of nftMetadatas) {
+    await createAndFundTiplink(
+      connection,
+      payer,
+      treeAddress,
+      collectionMint,
+      collectionMetadataAccount,
+      collectionMasterEditionAccount,
+      nftMetadata // pass the current NFTMetadata object
+    );
+  }
 
-  const compressedNFTMetadata: MetadataArgs = {
-    name: "NFT Name",
-    symbol: "SSNC",
-    // specific json metadata for each NFT
-    uri: "https://supersweetcollection.notarealurl/token.json",
-    creators: [
-      {
-        address: payer.publicKey,
-        verified: false,
-        share: 100,
-      },
-      {
-        address: testWallet.publicKey,
-        verified: false,
-        share: 0,
-      },
-    ],
-    editionNonce: 0,
-    uses: null,
-    collection: null,
-    primarySaleHappened: false,
-    sellerFeeBasisPoints: 0,
-    isMutable: false,
-    // values taken from the Bubblegum package
-    tokenProgramVersion: TokenProgramVersion.Original,
-    tokenStandard: TokenStandard.NonFungible,
-  };
-
-  // fully mint a single compressed NFT to the payer
-  console.log(`Minting a single compressed NFT to ${payer.publicKey.toBase58()}...`);
-
-  const mintToPayer = await mintCompressedNFT(
-    connection,
-    payer,
-    treeAddress,
-    collectionMint,
-    collectionMetadataAccount,
-    collectionMasterEditionAccount,
-    compressedNFTMetadata,
-    // mint to this specific wallet (in this case, the tree owner aka `payer`)
-    payer.publicKey,
-  );
-
-  // fully mint a single compressed NFT
-  console.log(`Minting a single compressed NFT to ${testWallet.publicKey.toBase58()}...`);
-
-  const mintToWallet = await mintCompressedNFT(
-    connection,
-    payer,
-    treeAddress,
-    collectionMint,
-    collectionMetadataAccount,
-    collectionMasterEditionAccount,
-    compressedNFTMetadata,
-    // mint to this specific wallet (in this case, airdrop to `testWallet`)
-    testWallet.publicKey,
-  );
 })();
