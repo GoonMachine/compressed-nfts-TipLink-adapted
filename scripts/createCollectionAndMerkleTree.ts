@@ -35,7 +35,6 @@
  
  // import custom helpers for demos
  import {
-   loadKeypairFromFile,
    loadOrGenerateKeypair,
    numberFormatter,
    printConsoleSeparator,
@@ -43,7 +42,7 @@
  } from "@/utils/helpers";
  
  // import custom helpers to mint compressed NFTs
- import { createCollection, createTree, mintCompressedNFT } from "@/utils/compression";
+ import { createCollection, createTree, } from "@/utils/compression";
  
  // local import of the connection wrapper, to help with using the ReadApi
  import { WrapperConnection } from "@/ReadApi/WrapperConnection";
@@ -60,20 +59,16 @@
    //////////////////////////////////////////////////////////////////////////////
    //////////////////////////////////////////////////////////////////////////////
  
-   // generate a new Keypair for testing, named `wallet`
-   const testWallet = loadOrGenerateKeypair("testWallet");
+
  
    // generate a new keypair for use in this demo (or load it locally from the filesystem when available)
-   const payer = process.env?.LOCAL_PAYER_JSON_ABSPATH
-     ? loadKeypairFromFile(process.env?.LOCAL_PAYER_JSON_ABSPATH)
-     : loadOrGenerateKeypair("payer");
+   const payer = loadOrGenerateKeypair("payer");
+   console.log(`Please send 1.1 SOL to this wallet ${payer}`)
  
    console.log("Payer address:", payer.publicKey.toBase58());
-   console.log("Test wallet address:", testWallet.publicKey.toBase58());
  
    // locally save the addresses for the demo
    savePublicKeyToFile("userAddress", payer.publicKey);
-   savePublicKeyToFile("testWallet", testWallet.publicKey);
  
    //////////////////////////////////////////////////////////////////////////////
    //////////////////////////////////////////////////////////////////////////////
@@ -103,12 +98,12 @@
    */
    const maxDepthSizePair: ValidDepthSizePair = {
      // max=8 nodes
-     maxDepth: 3,
-     maxBufferSize: 8,
+    //  maxDepth: 3,
+    //  maxBufferSize: 8,
  
      // max=16,384 nodes
-    //  maxDepth: 14,
-    //  maxBufferSize: 64,
+     maxDepth: 14,
+     maxBufferSize: 64,
  
      // max=131,072 nodes
      // maxDepth: 17,
@@ -122,7 +117,7 @@
      // maxDepth: 30,
      // maxBufferSize: 2048,
    };
-   const canopyDepth = maxDepthSizePair.maxDepth - 5;
+   const canopyDepth = maxDepthSizePair.maxDepth - 3;
  
    //////////////////////////////////////////////////////////////////////////////
    //////////////////////////////////////////////////////////////////////////////

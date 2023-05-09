@@ -25,30 +25,11 @@ import {
 // load the env variables and store the cluster RPC url
 import dotenv from "dotenv";
 import { TipLink } from "@tiplink/api";
+
+// import the NFTMetadata
+import { createCompressedNFTMetadata, NFTMetadata, nftMetadatas } from 'Metadata/nftMetadata';
+
 dotenv.config();
-
-// Array of metadata for each NFT
-const nftMetadatas: NFTMetadata[] = [
-  {
-    name: "Compressed NFT 1",
-    uri: "https://shdw-drive.genesysgo.net/HcnRQ2WJHfJzSgPrs4pPtEkiQjYTu1Bf6DmMns1yEWr8/1.json",
-    symbol:"Testy Test"
-  },
-  {
-    name: "Compressed NFT 2",
-    uri: "https://shdw-drive.genesysgo.net/HcnRQ2WJHfJzSgPrs4pPtEkiQjYTu1Bf6DmMns1yEWr8/1.json",
-    symbol:"Testy Test"
-  },
-  // ...more NFT metadata...
-];
-
-type NFTMetadata = {
-  name: string;
-  uri: string;
-  symbol: string;
-  // ...other properties...
-};
-
 
 const TIPLINK_MINIMUM_LAMPORTS = 1_000_000;
 
@@ -60,50 +41,22 @@ const createAndFundTiplink = async (
   collectionMetadataAccount: PublicKey,
   collectionMasterEditionAccount: PublicKey,
   nftMetadata: NFTMetadata
-) => {  const tipLink = await TipLink.create();
-  const tipLinkPubKey = tipLink.keypair.publicKey;
-  console.log(tipLink.url.href);
+) => {  
+  const tipLinkPubKey = new PublicKey("Replace this with the TipLink Public Key")
   
   const transaction = new Transaction().add(
     SystemProgram.transfer({
       fromPubkey: payer.publicKey,
-      toPubkey: tipLink.keypair.publicKey,
+      toPubkey: tipLinkPubKey,
       lamports: TIPLINK_MINIMUM_LAMPORTS,
     }),
   );
 
   await sendAndConfirmTransaction(connection, transaction, [payer], {commitment: 'confirmed'});
 
-  const compressedNFTMetadata: MetadataArgs = {
-    name: nftMetadata.name,
-    symbol: nftMetadata.symbol,
-    // specific json metadata for each NFT
-    uri: nftMetadata.uri,
-    creators: [
-      {
-        address: payer.publicKey,
-        verified: false,
-        share: 100,
-      },
-      {
-        address: tipLinkPubKey,
-        verified: false,
-        share: 0,
-      },
-    ],
-    editionNonce: 0,
-    uses: null,
-    collection: null,
-    primarySaleHappened: false,
-    sellerFeeBasisPoints: 0,
-    isMutable: false,
-    // values taken from the Bubblegum package
-    tokenProgramVersion: TokenProgramVersion.Original,
-    tokenStandard: TokenStandard.NonFungible,
-  };
-
   console.log(`Minting a single compressed NFT to ${tipLinkPubKey.toBase58()}...`);
-
+  
+  const compressedNFTMetadata = createCompressedNFTMetadata(nftMetadata, payer, tipLinkPubKey);
   await mintCompressedNFT(
     connection,
     payer,
@@ -112,7 +65,6 @@ const createAndFundTiplink = async (
     collectionMetadataAccount,
     collectionMasterEditionAccount,
     compressedNFTMetadata,
-    // mint to this specific wallet (in this case, airdrop to `testWallet`)
     tipLinkPubKey,
   );
 };
@@ -129,8 +81,6 @@ const createAndFundTiplink = async (
 
   console.log("Payer address:", payer.publicKey.toBase58());
   
-  const TIPLINK_MINIMUM_LAMPORTS = 1_000_000
-
   // load the stored PublicKeys for ease of use
   let keys = loadPublicKeysFromFile();
 
