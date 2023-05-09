@@ -33,13 +33,11 @@ const nftMetadatas: NFTMetadata[] = [
     name: "Compressed NFT 1",
     uri: "https://shdw-drive.genesysgo.net/HcnRQ2WJHfJzSgPrs4pPtEkiQjYTu1Bf6DmMns1yEWr8/1.json",
     symbol:"Testy Test"
-    // ...other properties...
   },
   {
     name: "Compressed NFT 2",
     uri: "https://shdw-drive.genesysgo.net/HcnRQ2WJHfJzSgPrs4pPtEkiQjYTu1Bf6DmMns1yEWr8/1.json",
     symbol:"Testy Test"
-    // ...other properties...
   },
   // ...more NFT metadata...
 ];
