@@ -6,17 +6,12 @@
 */
 
 import { PublicKey, clusterApiUrl, Transaction, SystemProgram, sendAndConfirmTransaction, Keypair } from "@solana/web3.js";
-import {
-  MetadataArgs,
-  TokenProgramVersion,
-  TokenStandard,
-} from "@metaplex-foundation/mpl-bubblegum";
 
 // import custom helpers to mint compressed NFTs
 import { WrapperConnection } from "@/ReadApi/WrapperConnection";
-import { mintCompressedNFT } from "@/utils/compression";
+import { mintCompressedNFTIxn } from "@/utils/compression";
 import {
-  loadKeypairFromFile,
+  explorerURL,
   loadOrGenerateKeypair,
   loadPublicKeysFromFile,
   printConsoleSeparator,
@@ -24,10 +19,10 @@ import {
 
 // load the env variables and store the cluster RPC url
 import dotenv from "dotenv";
-import { TipLink } from "@tiplink/api";
 
 // import the NFTMetadata
 import { createCompressedNFTMetadata, NFTMetadata, nftMetadatas } from 'Metadata/nftMetadata';
+import { extractSignatureFromFailedTransaction } from "@/utils/helpers";
 
 dotenv.config();
 
@@ -44,21 +39,10 @@ const createAndFundTiplink = async (
 ) => {  
   const tipLinkPubKey = new PublicKey("Replace this with the TipLink Public Key")
   
-  const transaction = new Transaction().add(
-    SystemProgram.transfer({
-      fromPubkey: payer.publicKey,
-      toPubkey: tipLinkPubKey,
-      lamports: TIPLINK_MINIMUM_LAMPORTS,
-    }),
-  );
-
-  await sendAndConfirmTransaction(connection, transaction, [payer], {commitment: 'confirmed'});
-
-  console.log(`Minting a single compressed NFT to ${tipLinkPubKey.toBase58()}...`);
+  // await sendAndConfirmTransaction(connection, transaction, [payer], {commitment: 'confirmed'});
   
   const compressedNFTMetadata = createCompressedNFTMetadata(nftMetadata, payer, tipLinkPubKey);
-  await mintCompressedNFT(
-    connection,
+  const mintIxn = mintCompressedNFTIxn(
     payer,
     treeAddress,
     collectionMint,
@@ -67,6 +51,38 @@ const createAndFundTiplink = async (
     compressedNFTMetadata,
     tipLinkPubKey,
   );
+
+  try {
+    // construct the transaction with our instructions, making the `payer` the `feePayer`
+    const tx = new Transaction().add(
+      // We'll add a small amount of lamports to the TipLink account
+      SystemProgram.transfer({
+        fromPubkey: payer.publicKey,
+        toPubkey: tipLinkPubKey,
+        lamports: TIPLINK_MINIMUM_LAMPORTS,
+      }),
+      mintIxn,
+    );
+    tx.feePayer = payer.publicKey;
+
+    // send the transaction to the cluster
+    const txSignature = await sendAndConfirmTransaction(connection, tx, [payer], {
+      commitment: "confirmed",
+      skipPreflight: true,
+    });
+
+    console.log("\nSuccessfully minted the compressed NFT!");
+    console.log(explorerURL({ txSignature, cluster: "mainnet-beta" }));
+
+    return txSignature;
+  } catch (err) {
+    console.error("\nFailed to mint compressed NFT:", err);
+
+    // log a block explorer link for the failed transaction
+    await extractSignatureFromFailedTransaction(connection, err);
+
+    throw err;
+  }
 };
 
 (async () => {
@@ -74,10 +90,8 @@ const createAndFundTiplink = async (
   //////////////////////////////////////////////////////////////////////////////
 
 
-  // generate a new keypair for use in this demo (or load it locally from the filesystem when available)
-  const payer = process.env?.LOCAL_PAYER_JSON_ABSPATH
-    ? loadKeypairFromFile(process.env?.LOCAL_PAYER_JSON_ABSPATH)
-    : loadOrGenerateKeypair("payer");
+  // generate a new keypair for use in this demo
+  const payer = loadOrGenerateKeypair("payer");
 
   console.log("Payer address:", payer.publicKey.toBase58());
   

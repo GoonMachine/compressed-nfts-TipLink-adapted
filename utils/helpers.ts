@@ -246,13 +246,13 @@ export async function extractSignatureFromFailedTransaction(
         })
         .then(tx => {
           console.log(`\n==== Transaction logs for ${failedSig} ====`);
-          console.log(explorerURL({ txSignature: failedSig }), "");
+          console.log(explorerURL({ txSignature: failedSig, cluster: "mainnet-beta" }), "");
           console.log(tx?.meta?.logMessages ?? "No log messages provided by RPC");
           console.log(`==== END LOGS ====\n`);
         });
     else {
       console.log("\n========================================");
-      console.log(explorerURL({ txSignature: failedSig }));
+      console.log(explorerURL({ txSignature: failedSig, cluster: "mainnet-beta" }));
       console.log("========================================\n");
     }
   }
