@@ -45,9 +45,6 @@ const createAndFundTipLink = async (
 
   const tipLinkPubKey = new PublicKey("Change this out for the created TipLink public key")
   
-	//this logs out the URL for the TipLink wallet
-	console.log(` Here is one of your TipLinks: ${tipLink.url.href}`);
-
   
     const csvData = `${tipLink.url.href}\n`;
     fs.appendFileSync("outputTipLink.csv", csvData, "utf8");
