@@ -4,7 +4,6 @@
   NOTE: A collection can use multiple trees to store compressed NFTs, as desired. 
   This example uses the same tree for simplicity.
 */
-
 import { PublicKey, clusterApiUrl, Transaction, SystemProgram, sendAndConfirmTransaction, Keypair } from "@solana/web3.js";
 
 // import custom helpers to mint compressed NFTs
@@ -44,13 +43,17 @@ const createAndFundTipLink = async (
 
   //Add the function to create a TipLink and update the tipLinkPubKey variable
 
-  const tipLinkPubKey = new PublicKey("Replace this with the TipLink Public Key")
+  const tipLinkPubKey = new PublicKey("Change this out for the created TipLink public key")
+  
+	//this logs out the URL for the TipLink wallet
+	console.log(` Here is one of your TipLinks: ${tipLink.url.href}`);
+
   
     const csvData = `${tipLink.url.href}\n`;
     fs.appendFileSync("outputTipLink.csv", csvData, "utf8");
     
     
-  const compressedNFTMetadata = createCompressedNFTMetadata(nftMetadata, payer, tipLinkPubKey);
+  const compressedNFTMetadata = createCompressedNFTMetadata(nftMetadata, payer);
   const mintIxn = mintCompressedNFTIxn(
     payer,
     treeAddress,
@@ -139,6 +142,7 @@ const createAndFundTipLink = async (
   printConsoleSeparator();
 
   for (const nftMetadata of nftMetadatas) {
+    console.log(nftMetadata);
     await createAndFundTipLink(
       connection,
       payer,

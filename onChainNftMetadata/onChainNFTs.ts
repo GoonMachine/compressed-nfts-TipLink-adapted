@@ -18,13 +18,13 @@ export const nftMetadatas: NFTMetadata[] = [
     name: "Compressed NFT 1",
     //This is example JSON metadata for the NFTs
     uri: "https://shdw-drive.genesysgo.net/91uEGv2pFyc3nZPgya6L41FKaoD6GoTcGDHqhokHe7Hw/compressedNFT1.json",
-    symbol:"Testy Test"
+    symbol:"TESTooor"
   },
   {
     name: "Compressed NFT 2",
     //This is example JSON metadata for the NFTs
     uri: "https://shdw-drive.genesysgo.net/91uEGv2pFyc3nZPgya6L41FKaoD6GoTcGDHqhokHe7Hw/compressedNFT2.json",
-    symbol:"Testy Test"
+    symbol:"TESTooor"
   },
   // ...more NFT metadata...
 ];
@@ -32,7 +32,7 @@ export const nftMetadatas: NFTMetadata[] = [
 
 
 
-export const createCompressedNFTMetadata = (nftMetadata: NFTMetadata, payer: Keypair, tipLinkPubKey: PublicKey): MetadataArgs => {
+export const createCompressedNFTMetadata = (nftMetadata: NFTMetadata, payer: Keypair): MetadataArgs => {
   return {
     name: nftMetadata.name,
     symbol: nftMetadata.symbol,
