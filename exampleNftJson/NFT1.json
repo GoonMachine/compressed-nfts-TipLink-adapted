@@ -1,0 +1,21 @@
+{
+    "name": "Compressed NFT 1",
+    "symbol": "Testy Test",
+    "description": "",
+    "image": "https://shdw-drive.genesysgo.net/91uEGv2pFyc3nZPgya6L41FKaoD6GoTcGDHqhokHe7Hw/Frame%205%20(3).png",
+    "external_url": "",
+    "attributes": [
+      {
+        "trait_type": "Number",
+        "value": "One"
+      }
+    ],
+    "properties": {
+      "files": [
+        {
+          "uri": "https://shdw-drive.genesysgo.net/91uEGv2pFyc3nZPgya6L41FKaoD6GoTcGDHqhokHe7Hw/Frame%205%20(3).png",
+          "type": "image/png"
+        }
+      ]
+    }
+  }

@@ -21,7 +21,7 @@ import {
 import dotenv from "dotenv";
 
 // import the NFTMetadata
-import { createCompressedNFTMetadata, NFTMetadata, nftMetadatas } from 'Metadata/nftMetadata';
+import { createCompressedNFTMetadata, NFTMetadata, nftMetadatas } from '@/onChainNftMetadata/nftMetadataAndUri';
 import { extractSignatureFromFailedTransaction } from "@/utils/helpers";
 
 dotenv.config();

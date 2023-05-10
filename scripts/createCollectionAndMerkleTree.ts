@@ -2,23 +2,19 @@
  * Compressed NFTs on Solana, using State Compression
   ---
   Overall flow of this script
-  - load or create two keypairs (named `payer` and `testWallet`)
+  - load a keypair named `payer` 
   - create a new tree with enough space to mint all the nft's you want for the "collection"
   - create a new NFT Collection on chain (using the usual Metaplex methods)
-  - mint a single compressed nft into the tree to the `payer`
-  - mint a single compressed nft into the tree to the `testWallet`
   - display the overall cost to perform all these actions
 
   ---
-  NOTE: this script is identical to the `scripts/createAndMint.ts` file, except THIS file has
-  additional explanation, comments, and console logging for demonstration purposes.
 */
 
 /**
  * General process of minting a compressed NFT:
  * - create a tree
  * - create a collection
- * - mint compressed NFTs to the tree
+ * - mint compressed NFTs to the tree (This is done in the mintToTipLink.ts script)
  */
 
  import { Keypair, LAMPORTS_PER_SOL, clusterApiUrl } from "@solana/web3.js";
@@ -26,11 +22,7 @@
    ValidDepthSizePair,
    getConcurrentMerkleTreeAccountSize,
  } from "@solana/spl-account-compression";
- import {
-   MetadataArgs,
-   TokenProgramVersion,
-   TokenStandard,
- } from "@metaplex-foundation/mpl-bubblegum";
+
  import { CreateMetadataAccountArgsV3 } from "@metaplex-foundation/mpl-token-metadata";
  
  // import custom helpers for demos
@@ -61,9 +53,9 @@
  
 
  
-   // generate a new keypair for use in this demo (or load it locally from the filesystem when available)
+   // load your kepair locally from the filesystem after running the createWallet.ts script)
    const payer = loadOrGenerateKeypair("payer");
-   console.log(`Please send 1.1 SOL to this wallet ${payer}`)
+
  
    console.log("Payer address:", payer.publicKey.toBase58());
  
@@ -74,7 +66,7 @@
    //////////////////////////////////////////////////////////////////////////////
  
    // load the env variables and store the cluster RPC url
-   const CLUSTER_URL = process.env.RPC_URL ?? clusterApiUrl("devnet");
+   const CLUSTER_URL = process.env.RPC_URL ?? clusterApiUrl("mainnet-beta");
  
    // create a new rpc connection, using the ReadApi wrapper
    const connection = new WrapperConnection(CLUSTER_URL);
@@ -98,12 +90,12 @@
    */
    const maxDepthSizePair: ValidDepthSizePair = {
      // max=8 nodes
-    //  maxDepth: 3,
-    //  maxBufferSize: 8,
+     maxDepth: 3,
+     maxBufferSize: 8,
  
      // max=16,384 nodes
-     maxDepth: 14,
-     maxBufferSize: 64,
+    //  maxDepth: 14,
+    //  maxBufferSize: 64,
  
      // max=131,072 nodes
      // maxDepth: 17,
