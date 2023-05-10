@@ -21,14 +21,18 @@ import {
 import dotenv from "dotenv";
 
 // import the NFTMetadata
-import { createCompressedNFTMetadata, NFTMetadata, nftMetadatas } from '@/onChainNftMetadata/nftMetadataAndUri';
+import { createCompressedNFTMetadata, NFTMetadata, nftMetadatas } from '@/onChainNftMetadata/onChainNFTs';
 import { extractSignatureFromFailedTransaction } from "@/utils/helpers";
+
+// import fs to write the TipLink wallet URLs to a CSV file
+import fs from "fs";
+
 
 dotenv.config();
 
 const TIPLINK_MINIMUM_LAMPORTS = 1_000_000;
 
-const createAndFundTiplink = async (
+const createAndFundTipLink = async (
   connection: WrapperConnection,
   payer: Keypair,
   treeAddress: PublicKey,
@@ -37,10 +41,15 @@ const createAndFundTiplink = async (
   collectionMasterEditionAccount: PublicKey,
   nftMetadata: NFTMetadata
 ) => {  
+
+  //Add the function to create a TipLink and update the tipLinkPubKey variable
+
   const tipLinkPubKey = new PublicKey("Replace this with the TipLink Public Key")
   
-  // await sendAndConfirmTransaction(connection, transaction, [payer], {commitment: 'confirmed'});
-  
+    const csvData = `${tipLink.url.href}`;
+    fs.appendFileSync("outputTipLink.csv", csvData, "utf8");
+    
+    
   const compressedNFTMetadata = createCompressedNFTMetadata(nftMetadata, payer, tipLinkPubKey);
   const mintIxn = mintCompressedNFTIxn(
     payer,
@@ -130,7 +139,7 @@ const createAndFundTiplink = async (
   printConsoleSeparator();
 
   for (const nftMetadata of nftMetadatas) {
-    await createAndFundTiplink(
+    await createAndFundTipLink(
       connection,
       payer,
       treeAddress,
