@@ -46,7 +46,7 @@ const createAndFundTipLink = async (
 
   const tipLinkPubKey = new PublicKey("Replace this with the TipLink Public Key")
   
-    const csvData = `${tipLink.url.href}`;
+    const csvData = `${tipLink.url.href}\n`;
     fs.appendFileSync("outputTipLink.csv", csvData, "utf8");
     
     

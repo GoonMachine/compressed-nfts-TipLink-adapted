@@ -98,7 +98,7 @@ export async function createTree(
     );
 
     console.log("\nMerkle tree created successfully!");
-    console.log(explorerURL({ txSignature }));
+    console.log(explorerURL({ txSignature, cluster: "mainnet-beta" }));
 
     // return useful info
     return { treeAuthority, treeAddress: treeKeypair.publicKey };
@@ -106,7 +106,7 @@ export async function createTree(
     console.error("\nFailed to create merkle tree:", err);
 
     // log a block explorer link for the failed transaction
-    await extractSignatureFromFailedTransaction(connection, err);
+    await extractSignatureFromFailedTransaction(connection, err, );
 
     throw err;
   }
@@ -240,7 +240,7 @@ export async function createCollection(
     });
 
     console.log("\nCollection successfully created!");
-    console.log(explorerURL({ txSignature }));
+    console.log(explorerURL({ txSignature, cluster: "mainnet-beta" }));
   } catch (err) {
     console.error("\nFailed to create collection:", err);
 

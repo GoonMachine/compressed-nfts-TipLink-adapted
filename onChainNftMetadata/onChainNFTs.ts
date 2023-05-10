@@ -17,13 +17,13 @@ export const nftMetadatas: NFTMetadata[] = [
   {
     name: "Compressed NFT 1",
     //This is example JSON metadata for the NFTs
-    uri: "https://shdw-drive.genesysgo.net/91uEGv2pFyc3nZPgya6L41FKaoD6GoTcGDHqhokHe7Hw/Frame%205%20(3).png",
+    uri: "https://shdw-drive.genesysgo.net/91uEGv2pFyc3nZPgya6L41FKaoD6GoTcGDHqhokHe7Hw/compressedNFT1.json",
     symbol:"Testy Test"
   },
   {
     name: "Compressed NFT 2",
     //This is example JSON metadata for the NFTs
-    uri: "https://shdw-drive.genesysgo.net/91uEGv2pFyc3nZPgya6L41FKaoD6GoTcGDHqhokHe7Hw/Frame%205%20(4).png",
+    uri: "https://shdw-drive.genesysgo.net/91uEGv2pFyc3nZPgya6L41FKaoD6GoTcGDHqhokHe7Hw/compressedNFT2.json",
     symbol:"Testy Test"
   },
   // ...more NFT metadata...
